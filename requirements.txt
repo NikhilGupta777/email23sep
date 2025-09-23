@@ -1,0 +1,15 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy
+psycopg2-binary
+python-dotenv
+passlib[bcrypt]
+python-jose[cryptography]
+sendgrid
+Authlib
+dnspython
+requests
+aiohttp
+pydantic[email]
+starlette
+webbrowser

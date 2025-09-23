@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outreach Automator</title>
+
+    <!-- External Dependencies -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="static/css/styles.css">
+</head>
+
+<body class="antialiased">
+    <!-- Login Modal -->
+    <div id="app-login-modal" class="modal">
+        <div class="rounded-xl shadow-2xl w-full max-w-md p-6" style="background-color: var(--bg-primary); color: var(--text-primary)">
+            <div class="flex justify-center mb-4">
+                <button id="login-tab-manual" class="tab-btn active">Manual Login</button>
+                <button id="login-tab-google" class="tab-btn">Google Sign In</button>
+            </div>
+            <div id="manual-login-form" class="login-form active">
+                <h2 class="text-xl font-bold text-gray-800 text-center mb-4">Sign In</h2>
+                <p class="text-center text-gray-500 mb-6">Enter your credentials to access the application.</p>
+                <div class="space-y-4">
+                    <input id="login-username" type="text" placeholder="Username"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <input id="login-password" type="password" placeholder="Password"
+                        class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <p id="login-error" class="text-red-500 text-sm mt-2 text-center h-4"></p>
+                <button id="login-button" class="w-full btn-primary mt-4">Sign In</button>
+            </div>
+            <div id="google-login-form" class="login-form hidden">
+                <h2 class="text-xl font-bold text-gray-800 text-center mb-4">Sign In with Google</h2>
+                <p class="text-center text-gray-500 mb-6">Use your Google account for quick access.</p>
+                <button id="google-login-button" class="w-full flex items-center justify-center btn-primary mt-4">
+                    <i data-lucide="log-in" class="mr-2"></i> Sign In with Google
+                </button>
+                <div id="g_id_onload"></div>
+            </div>
+            <div class="mt-4 text-center text-sm text-gray-500">
+                <p>Don't have an account? <a href="#" id="contact-admin-link"
+                        class="text-blue-600 hover:underline">Contact admin</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Modal -->
+    <div id="contact-modal" class="modal hidden">
+        <div class="rounded-xl shadow-2xl w-full max-w-md p-6" style="background-color: var(--bg-primary); color: var(--text-primary)">
+            <h2 class="text-xl font-bold text-gray-800 text-center mb-4">Contact Admin</h2>
+            <p class="text-gray-600 mb-4 text-center">It looks like your credentials were not provided or you are not in
+                the Email Karya group. To participate in Email Karya, please contact the admin via email.</p>
+            <div class="space-y-3">
+                <button id="email-admin-btn" class="w-full btn-primary flex items-center justify-center">
+                    <i data-lucide="mail" class="mr-2"></i> Email Admin
+                </button>
+                <button id="contact-close-btn" class="w-full btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="min-h-screen flex hidden">
+        <!-- Sidebar -->
+        <div class="w-64 text-white min-h-screen" style="background-color: var(--bg-sidebar)">
+            <div class="p-4">
+                <h1 class="text-xl font-bold">Outreach Automator</h1>
+            </div>
+            <nav class="mt-8">
+                <a href="#" id="nav-dashboard"
+                    class="nav-link active block px-4 py-2 text-gray-300 hover:bg-gray-700">Dashboard</a>
+                <a href="#" id="nav-campaign" class="nav-link block px-4 py-2 text-gray-300 hover:bg-gray-700">New
+                    Campaign</a>
+                <a href="#" id="nav-templates"
+                    class="nav-link block px-4 py-2 text-gray-300 hover:bg-gray-700">Templates</a>
+                <a href="#" id="nav-validation" class="nav-link block px-4 py-2 text-gray-300 hover:bg-gray-700">Email
+                    Validation</a>
+                <a href="#" id="nav-analytics"
+                    class="nav-link block px-4 py-2 text-gray-300 hover:bg-gray-700">Analytics</a>
+                <a href="#" id="nav-admin" class="nav-link block px-4 py-2 text-gray-300 hover:bg-gray-700 hidden">Admin
+                    Panel</a>
+            </nav>
+            <div class="absolute bottom-0 w-64 p-4">
+                <!-- Profile and logout moved to top right panel -->
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col">
+            <header class="shadow p-4 flex justify-between items-center" style="background-color: var(--bg-primary); color: var(--text-primary)">
+                <h2 id="page-title" class="text-2xl font-bold" style="color: var(--text-primary)">Dashboard</h2>
+                <div class="flex items-center space-x-2">
+                    <button id="theme-toggle" class="p-2 rounded-lg transition-colors" style="background-color: var(--bg-tertiary); color: var(--text-secondary)" title="Toggle Theme">
+                        <i data-lucide="sun" class="w-5 h-5"></i>
+                    </button>
+                    <select id="theme-select" class="px-3 py-1 rounded-lg text-sm" style="border-color: var(--border-color); background-color: var(--bg-primary); color: var(--text-primary)">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                    <div class="relative">
+                        <button id="profile-dropdown-toggle" class="p-2 rounded-lg transition-colors flex items-center space-x-2 cursor-pointer hover:opacity-80" style="background-color: var(--bg-tertiary); color: var(--text-secondary)" title="Profile">
+                            <i data-lucide="user" class="w-5 h-5"></i>
+                            <span id="profile-username-display" class="text-sm hidden sm:block"></span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform duration-200" id="profile-chevron"></i>
+                        </button>
+                        <div id="profile-dropdown" class="absolute right-0 mt-2 w-64 rounded-lg shadow-lg hidden z-50" style="background-color: var(--bg-primary); border-color: var(--border-color); border-width: 1px">
+                            <div class="p-4 border-b" style="border-color: var(--border-color)">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center" style="background-color: var(--bg-accent)">
+                                        <i data-lucide="user" class="w-6 h-6" style="color: var(--text-primary)"></i>
+                                    </div>
+                                    <div>
+                                        <p id="dropdown-username" class="font-semibold" style="color: var(--text-primary)">Username</p>
+                                        <p id="dropdown-email" class="text-sm" style="color: var(--text-secondary)">email@example.com</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="py-2">
+                                <button id="dropdown-view-profile" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2" style="color: var(--text-primary)">
+                                    <i data-lucide="user" class="w-4 h-4"></i>
+                                    <span>View Profile</span>
+                                </button>
+                                <button id="dropdown-edit-profile" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2" style="color: var(--text-primary)">
+                                    <i data-lucide="edit" class="w-4 h-4"></i>
+                                    <span>Edit Profile</span>
+                                </button>
+                                <button id="dropdown-change-password" class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center space-x-2" style="color: var(--text-primary)">
+                                    <i data-lucide="lock" class="w-4 h-4"></i>
+                                    <span>Change Password</span>
+                                </button>
+                                <div class="border-t my-2" style="border-color: var(--border-color)"></div>
+                                <button id="dropdown-logout" class="w-full text-left px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors flex items-center space-x-2">
+                                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                                    <span>Logout</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main class="flex-1 p-6" style="background-color: var(--bg-secondary)">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section" class="page-section">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                        <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-secondary)">Today</h3>
+                            <p id="stats-today" class="text-3xl font-bold" style="color: var(--text-accent)">0</p>
+                        </div>
+                        <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-secondary)">Last 7 Days</h3>
+                            <p id="stats-week" class="text-3xl font-bold" style="color: var(--success)">0</p>
+                        </div>
+                        <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-secondary)">Last 30 Days</h3>
+                            <p id="stats-month" class="text-3xl font-bold" style="color: var(--warning)">0</p>
+                        </div>
+                        <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                            <h3 class="text-lg font-semibold" style="color: var(--text-secondary)">This Month</h3>
+                            <p id="stats-this-month" class="text-3xl font-bold" style="color: var(--error)">0</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-secondary)">Recent Campaigns</h3>
+                            <div id="recent-campaigns" class="space-y-2"></div>
+                        </div>
+                        <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-secondary)">Quick Actions</h3>
+                            <div class="space-y-2">
+                                <button id="quick-new-campaign" class="w-full btn-primary text-left">Create New
+                                    Campaign</button>
+                                <button id="quick-manage-templates" class="w-full btn-secondary text-left">Manage
+                                    Templates</button>
+                                <button id="quick-validate-emails" class="w-full btn-secondary text-left">Validate
+                                    Emails</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Campaign Section -->
+                <div id="campaign-section" class="page-section hidden">
+                    <div class="max-w-4xl mx-auto">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold" style="color: var(--text-light)">New Campaign</h2>
+                            <button id="back-to-dashboard" class="btn-secondary">Back to Dashboard</button>
+                        </div>
+
+                        <main id="main-content" class="relative min-h-[500px]">
+                            <!-- Step 1: Choose Sender -->
+                            <div id="step-1" class="step-card p-8 rounded-xl shadow-lg" style="background-color: var(--bg-primary); color: var(--text-primary)">
+                                <div class="flex items-center mb-6">
+                                    <div
+                                        class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
+                                        1</div>
+                                    <h2 class="text-2xl font-semibold text-gray-700 ml-4">Choose Sender Account</h2>
+                                </div>
+                                <p class="text-gray-500 mb-4">Select which of your connected accounts will send this
+                                    campaign.</p>
+                                <select id="sender-account"
+                                    class="w-full p-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></select>
+                                <div class="mt-8 text-right">
+                                    <button id="step1-next" class="btn-primary">Next: Select Template →</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Select Template -->
+                            <div id="step-2" class="step-card hidden bg-white p-8 rounded-xl shadow-lg">
+                                <div class="flex items-center mb-6">
+                                    <div
+                                        class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
+                                        2</div>
+                                    <h2 class="text-2xl font-semibold text-gray-700 ml-4">Select Email Template</h2>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="template-options"></div>
+                                <div id="template-preview-container" class="mt-6 hidden">
+                                    <h3 class="font-semibold text-gray-600">Template Preview:</h3>
+                                    <div class="mt-2 p-4 border rounded-lg bg-gray-50">
+                                        <p class="font-bold text-gray-800" id="preview-subject"></p>
+                                        <hr class="my-2">
+                                        <p class="text-gray-600 whitespace-pre-wrap" id="preview-body"></p>
+                                    </div>
+                                </div>
+                                <div class="mt-8 flex justify-between">
+                                    <button onclick="goToStep(1)" class="btn-secondary">← Back</button>
+                                    <button id="step2-next" onclick="goToStep(3)" class="btn-primary" disabled>Next: Add
+                                        Recipients →</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Add Recipients -->
+                            <div id="step-3" class="step-card hidden bg-white p-8 rounded-xl shadow-lg">
+                                <div class="flex items-center mb-6">
+                                    <div
+                                        class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
+                                        3</div>
+                                    <h2 class="text-2xl font-semibold text-gray-700 ml-4">Add Recipients</h2>
+                                </div>
+                                <p class="text-gray-500 mb-4">Paste recipient data below. Use CSV format:
+                                    `email,name,organization`.</p>
+                                <textarea id="recipient-input"
+                                    class="w-full h-48 p-3 border border-gray-300 rounded-lg bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                                    placeholder="example@email.com,John Doe,Example Inc.&#10;another@email.com,Jane Smith,Another Corp"></textarea>
+                                <p class="text-sm text-gray-500 mt-2"><span id="recipient-count">0</span> recipients
+                                    detected.</p>
+                                <div class="mt-8 flex justify-between">
+                                    <button onclick="goToStep(2)" class="btn-secondary">← Back</button>
+                                    <button id="step3-next" onclick="goToStep(4)" class="btn-primary" disabled>Next:
+                                        Review & Send →</button>
+                                </div>
+                            </div>
+
+                            <!-- Step 4: Review & Send -->
+                            <div id="step-4" class="step-card hidden bg-white p-8 rounded-xl shadow-lg">
+                                <div class="flex items-center mb-6">
+                                    <div
+                                        class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
+                                        4</div>
+                                    <h2 class="text-2xl font-semibold text-gray-700 ml-4">Review & Send</h2>
+                                </div>
+                                <div class="space-y-4 text-gray-700 p-4 border rounded-lg bg-gray-50">
+                                    <p><strong>From:</strong> <span id="review-sender"
+                                            class="font-mono text-blue-700"></span></p>
+                                    <p><strong>Template:</strong> <span id="review-template"
+                                            class="font-semibold text-blue-700"></span></p>
+                                    <p><strong>Recipients:</strong> <span id="review-recipient-count"
+                                            class="font-semibold text-blue-700">0</span></p>
+                                </div>
+                                <div class="mt-6">
+                                    <h3 class="font-semibold text-gray-600">Sample Previews:</h3>
+                                    <div id="review-samples"
+                                        class="space-y-4 mt-2 max-h-60 overflow-y-auto p-4 border rounded-lg bg-gray-50">
+                                    </div>
+                                </div>
+                                <div class="mt-6">
+                                    <h4 class="font-semibold text-gray-600 mb-2">Pre-flight Checklist</h4>
+                                    <label class="flex items-center space-x-3 p-2 cursor-pointer">
+                                        <input type="checkbox"
+                                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 preflight-check">
+                                        <span>I have proofread the template for typos.</span>
+                                    </label>
+                                    <label class="flex items-center space-x-3 p-2 cursor-pointer">
+                                        <input type="checkbox"
+                                            class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 preflight-check">
+                                        <span>The recipient list is clean and correctly formatted.</span>
+                                    </label>
+                                </div>
+                                <div class="mt-8 flex justify-between items-center">
+                                    <button onclick="goToStep(3)" class="btn-secondary">← Back</button>
+                                    <button id="send-button" onclick="startCampaignExecution()"
+                                        class="btn-primary flex items-center space-x-2" disabled>
+                                        <i data-lucide="send"></i>
+                                        <span>Confirm & Send Campaign</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Step 5: Campaign Progress -->
+                            <div id="step-5" class="step-card hidden bg-white p-8 rounded-xl shadow-lg">
+                                <div class="flex items-center mb-6">
+                                    <div
+                                        class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-lg">
+                                        <i data-lucide="mail-check" class="w-5 h-5"></i>
+                                    </div>
+                                    <h2 class="text-2xl font-semibold text-gray-700 ml-4">Campaign in Progress...</h2>
+                                </div>
+                                <p class="text-gray-500 mb-4">Your emails are being sent. In a real app, you can close
+                                    this window; the process continues on the server.</p>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 0%">
+                                    </div>
+                                </div>
+                                <div class="text-center text-gray-600 mb-4">
+                                    <span id="progress-text">Sending 0 of 0...</span>
+                                </div>
+                                <div id="sending-log"
+                                    class="w-full h-48 bg-gray-800 text-white font-mono text-sm rounded-lg p-4 overflow-y-auto">
+                                </div>
+                                <div id="campaign-complete"
+                                    class="hidden mt-6 text-center p-4 bg-green-100 text-green-800 rounded-lg">
+                                    <h3 class="font-bold text-lg">Campaign Complete!</h3>
+                                    <p><span id="final-sent-count">0</span> emails sent, <span
+                                            id="final-fail-count">0</span> failed.</p>
+                                    <button onclick="resetApp()"
+                                        class="mt-4 bg-green-600 text-white hover:bg-green-700 font-semibold py-2 px-4 rounded-lg">Start
+                                        New Campaign</button>
+                                </div>
+                            </div>
+                        </main>
+                    </div>
+                </div>
+
+                <!-- Templates Section -->
+                <div id="templates-section" class="page-section hidden">
+                    <div class="max-w-6xl mx-auto">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold" style="color: var(--text-light)">Email Templates</h2>
+                            <button id="create-template-btn" class="btn-primary">Create New Template</button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="templates-grid"></div>
+                    </div>
+                </div>
+
+                <!-- Validation Section -->
+                <div id="validation-section" class="page-section hidden">
+                    <div class="max-w-6xl mx-auto">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="text-2xl font-bold" style="color: var(--text-light)">Email Validation</h2>
+                            <button id="back-to-dashboard-from-validation" class="btn-secondary">Back to
+                                Dashboard</button>
+                        </div>
+
+                        <div class="p-6 rounded-lg shadow mb-6" style="background-color: var(--bg-primary); color: var(--text-primary)">
+                            <h3 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">Email List Input</h3>
+                            <textarea id="emails-to-validate"
+                                class="w-full h-48 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-mono text-sm"
+                                placeholder="Enter emails, one per line (max 1000 emails)" maxlength="100000"
+                                spellcheck="false"></textarea>
+                            <div class="mt-2 text-sm text-gray-600">
+                                <span id="email-count">0</span> emails detected
+                            </div>
+                            <div class="mt-6 flex justify-between items-center">
+                                <div class="text-sm text-gray-600">
+                                    <span id="validation-status">Ready to validate</span>
+                                </div>
+                                <div class="space-x-3">
+                                    <button id="clear-input-btn" class="btn-secondary">Clear</button>
+                                    <button id="validate-emails-btn" class="btn-primary flex items-center">
+                                        <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i>
+                                        Validate Emails
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="validation-results" class="p-6 rounded-lg shadow hidden" style="background-color: var(--bg-primary); color: var(--text-primary)"></div>
+                    </div>
+                </div>
+
+                <!-- Analytics Section -->
+                <div id="analytics-section" class="page-section hidden">
+                    <div class="max-w-7xl mx-auto">
+                        <h2 class="text-2xl font-bold mb-6" style="color: var(--text-light)">Analytics Dashboard</h2>
+
+                        <!-- Key Metrics -->
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                            <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                                <h3 class="text-lg font-semibold" style="color: var(--text-secondary)">Total Emails</h3>
+                                <p id="analytics-total-emails" class="text-3xl font-bold" style="color: var(--text-accent)">0</p>
+                            </div>
+                            <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                                <h3 class="text-lg font-semibold" style="color: var(--text-secondary)">Delivery Rate</h3>
+                                <p id="analytics-delivery-rate" class="text-3xl font-bold" style="color: var(--success)">0%</p>
+                            </div>
+                            <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                                <h3 class="text-lg font-semibold" style="color: var(--text-secondary)">Bounce Rate</h3>
+                                <p id="analytics-bounce-rate" class="text-3xl font-bold" style="color: var(--error)">0%</p>
+                            </div>
+                            <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                                <h3 class="text-lg font-semibold" style="color: var(--text-secondary)">Success Rate</h3>
+                                <p id="analytics-success-rate" class="text-3xl font-bold" style="color: var(--warning)">0%</p>
+                            </div>
+                        </div>
+
+                        <!-- Time-Based Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                                <h3 class="text-lg font-semibold mb-4" style="color: var(--text-secondary)">Today</h3>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span style="color: var(--text-primary)">Sent:</span>
+                                        <span id="today-sent" class="font-bold" style="color: var(--success)">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span style="color: var(--text-primary)">Failed:</span>
+                                        <span id="today-failed" class="font-bold" style="color: var(--error)">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span style="color: var(--text-primary)">Bounced:</span>
+                                        <span id="today-bounced" class="font-bold" style="color: var(--warning)">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                                <h3 class="text-lg font-semibold mb-4" style="color: var(--text-secondary)">Last 7 Days</h3>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span style="color: var(--text-primary)">Sent:</span>
+                                        <span id="week-sent" class="font-bold" style="color: var(--success)">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span style="color: var(--text-primary)">Failed:</span>
+                                        <span id="week-failed" class="font-bold" style="color: var(--error)">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span style="color: var(--text-primary)">Bounced:</span>
+                                        <span id="week-bounced" class="font-bold" style="color: var(--warning)">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                                <h3 class="text-lg font-semibold mb-4" style="color: var(--text-secondary)">Last 30 Days</h3>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between">
+                                        <span style="color: var(--text-primary)">Sent:</span>
+                                        <span id="month-sent" class="font-bold" style="color: var(--success)">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span style="color: var(--text-primary)">Failed:</span>
+                                        <span id="month-failed" class="font-bold" style="color: var(--error)">0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span style="color: var(--text-primary)">Bounced:</span>
+                                        <span id="month-bounced" class="font-bold" style="color: var(--warning)">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Email Distribution -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                                <h3 class="text-lg font-semibold mb-4" style="color: var(--text-secondary)">Email Types</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span style="color: var(--text-primary)">Campaign Emails:</span>
+                                        <span id="campaign-emails-count" class="font-bold" style="color: var(--text-accent)">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span style="color: var(--text-primary)">Individual Emails:</span>
+                                        <span id="individual-emails-count" class="font-bold" style="color: var(--warning)">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-6 rounded-lg shadow" style="background-color: var(--bg-primary)">
+                                <h3 class="text-lg font-semibold mb-4" style="color: var(--text-secondary)">Overall Performance</h3>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center">
+                                        <span style="color: var(--text-primary)">Total Sent:</span>
+                                        <span id="total-sent" class="font-bold" style="color: var(--success)">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span style="color: var(--text-primary)">Total Failed:</span>
+                                        <span id="total-failed" class="font-bold" style="color: var(--error)">0</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span style="color: var(--text-primary)">Total Bounced:</span>
+                                        <span id="total-bounced" class="font-bold" style="color: var(--warning)">0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Profile Modal -->
+    <div id="profile-modal" class="modal hidden">
+        <div class="rounded-xl shadow-2xl w-full max-w-md p-6" style="background-color: var(--bg-primary); color: var(--text-primary)">
+            <h2 class="text-xl font-bold text-center mb-4" style="color: var(--text-light)">Your Profile</h2>
+            <p class="text-center text-gray-500 mb-6">Update your username and email address.</p>
+            <div class="space-y-4">
+                <div>
+                    <label for="profile-username" class="block text-sm font-medium text-gray-700">Username</label>
+                    <input id="profile-username" type="text" placeholder="Username"
+                        class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div>
+                    <label for="profile-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <input id="profile-email" type="email" placeholder="Email"
+                        class="mt-1 w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <p id="profile-message" class="text-sm mt-2 text-center h-4"></p>
+            <div class="mt-4 flex justify-end">
+                <button id="profile-save-btn" class="btn-primary">Save Profile</button>
+            </div>
+            <hr class="my-6" style="border-color: var(--border-color)">
+            <h3 class="text-lg font-bold text-center mb-4" style="color: var(--text-light)">Change Password</h3>
+            <div class="space-y-4">
+                <input id="current-password" type="password" placeholder="Current Password"
+                    class="w-full p-3 border border-gray-300 rounded-lg">
+                <input id="new-password" type="password" placeholder="New Password"
+                    class="w-full p-3 border border-gray-300 rounded-lg">
+            </div>
+            <p id="password-message" class="text-sm mt-2 text-center h-4"></p>
+            <div class="mt-4 flex justify-between">
+                <button id="profile-close-btn" class="btn-secondary">Close</button>
+                <button id="change-password-btn" class="btn-primary">Change Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="admin-panel-modal" class="modal hidden">
+        <div class="rounded-xl shadow-2xl w-full max-w-4xl p-6" style="background-color: var(--bg-primary); color: var(--text-primary)">
+            <h2 class="text-2xl font-bold text-center mb-6" style="color: var(--text-light)">Admin User Management</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white">
+                    <thead class="bg-gray-100">
+                        <tr>
+                            <th class="py-2 px-4 border-b">ID</th>
+                            <th class="py-2 px-4 border-b">Username</th>
+                            <th class="py-2 px-4 border-b">Email</th>
+                            <th class="py-2 px-4 border-b">Role</th>
+                            <th class="py-2 px-4 border-b">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="user-list-table"></tbody>
+                </table>
+            </div>
+            <div class="mt-6 p-4 border rounded-lg" style="background-color: var(--bg-tertiary); border-color: var(--border-color)">
+                <h3 class="font-semibold text-lg mb-2" style="color: var(--text-light)">Create New User</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <input id="new-user-username" type="text" placeholder="Username" class="p-2 border rounded">
+                    <input id="new-user-email" type="email" placeholder="Email" class="p-2 border rounded">
+                    <input id="new-user-password" type="password" placeholder="Password" class="p-2 border rounded">
+                </div>
+                <div class="mt-2 flex items-center justify-between">
+                    <select id="new-user-role" class="p-2 border rounded bg-white">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button id="add-user-btn" class="btn-primary">Add User</button>
+                </div>
+                <p id="admin-message" class="text-sm mt-2 text-center h-4"></p>
+            </div>
+            <div class="mt-4 text-right">
+                <button id="admin-panel-close-btn" class="btn-secondary">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div id="edit-user-modal" class="modal hidden">
+        <div class="rounded-xl shadow-2xl w-full max-w-md p-6" style="background-color: var(--bg-primary); color: var(--text-primary)">
+            <h2 class="text-xl font-bold text-gray-800 text-center mb-4">Edit User</h2>
+            <input type="hidden" id="edit-user-id">
+            <div class="space-y-4">
+                <div>
+                    <label for="edit-user-username">Username</label>
+                    <input id="edit-user-username" type="text" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label for="edit-user-email">Email</label>
+                    <input id="edit-user-email" type="email" class="w-full p-2 border rounded">
+                </div>
+                <div>
+                    <label for="edit-user-role">Role</label>
+                    <select id="edit-user-role" class="w-full p-2 border rounded bg-white">
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4 flex justify-between">
+                <button id="edit-user-close-btn" class="btn-secondary">Cancel</button>
+                <button id="edit-user-save-btn" class="btn-primary">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Modules -->
+    <script src="static/js/config.js"></script>
+    <script src="static/js/theme.js"></script>
+    <script src="static/js/api.js"></script>
+    <script src="static/js/auth.js"></script>
+    <script src="static/js/campaign.js"></script>
+    <script src="static/js/templates.js"></script>
+    <script src="static/js/validation.js"></script>
+    <script src="static/js/analytics.js"></script>
+    <script src="static/js/profile.js"></script>
+    <script src="static/js/app.js"></script>
+</body>
+
+</html>
