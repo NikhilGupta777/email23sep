@@ -1,0 +1,305 @@
+/* Custom Styles for Outreach Automator */
+
+/* Theme Variables */
+:root {
+    /* Light Theme */
+    --bg-primary: #ffffff;
+    --bg-secondary: #f3f4f6;
+    --bg-tertiary: #f9fafb;
+    --bg-sidebar: #1f2937;
+    --text-primary: #111827;
+    --text-secondary: #6b7280;
+    --text-accent: #2563eb;
+    --border-color: #e5e7eb;
+    --shadow: rgba(0, 0, 0, 0.1);
+    --btn-primary: #2563eb;
+    --btn-primary-hover: #1d4ed8;
+    --btn-secondary: #e5e7eb;
+    --btn-secondary-hover: #d1d5db;
+    --modal-bg: rgba(0, 0, 0, 0.6);
+    --success: #10b981;
+    --error: #ef4444;
+    --warning: #f59e0b;
+    --info: #3b82f6;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --bg-primary: #1f2937;
+    --bg-secondary: #111827;
+    --bg-tertiary: #374151;
+    --bg-sidebar: #111827;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-accent: #60a5fa;
+    --text-light: #ffffff; /* For important headings */
+    --border-color: #374151;
+    --shadow: rgba(0, 0, 0, 0.3);
+    --btn-primary: #3b82f6;
+    --btn-primary-hover: #2563eb;
+    --btn-secondary: #374151;
+    --btn-secondary-hover: #4b5563;
+    --modal-bg: rgba(0, 0, 0, 0.8);
+    --success: #34d399;
+    --error: #f87171;
+    --warning: #fbbf24;
+    --info: #60a5fa;
+    --input-bg: #374151;
+    --input-text: #f9fafb;
+    --input-placeholder: #9ca3af;
+    --input-border: #4b5563;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Form elements styling for themes */
+input, textarea, select {
+    background-color: var(--bg-primary, #ffffff);
+    color: var(--text-primary, #111827);
+    border-color: var(--border-color, #e5e7eb);
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+input::placeholder, textarea::placeholder {
+    color: var(--text-secondary, #6b7280);
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--text-accent, #2563eb);
+    outline: none;
+}
+
+/* Dark mode specific input styling */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background-color: var(--input-bg, #374151);
+    color: var(--input-text, #f9fafb);
+    border-color: var(--input-border, #4b5563);
+}
+
+[data-theme="dark"] input::placeholder,
+[data-theme="dark"] textarea::placeholder {
+    color: var(--input-placeholder, #9ca3af);
+}
+
+/* Tab buttons */
+.tab-btn {
+    color: var(--text-primary);
+    border-bottom-color: transparent;
+}
+
+.tab-btn.active {
+    color: var(--text-accent);
+    border-bottom-color: var(--text-accent);
+}
+
+/* Modal content */
+.modal .bg-white {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+/* Sidebar navigation */
+.nav-link {
+    color: var(--text-secondary);
+}
+
+.nav-link.active,
+.nav-link:hover {
+    color: var(--text-primary);
+}
+
+/* Important headings and text in dark mode */
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] .page-title,
+[data-theme="dark"] .step-card h2,
+[data-theme="dark"] .modal h2,
+[data-theme="dark"] .modal h3 {
+    color: var(--text-light) !important;
+}
+
+/* Template card titles and descriptions */
+[data-theme="dark"] .template-title {
+    color: var(--text-light) !important;
+}
+
+[data-theme="dark"] .template-description {
+    color: var(--text-primary) !important;
+}
+
+/* Form labels and important text */
+[data-theme="dark"] label,
+[data-theme="dark"] .form-label {
+    color: var(--text-light) !important;
+}
+
+/* Table headers */
+[data-theme="dark"] th {
+    color: var(--text-light) !important;
+    background-color: var(--bg-tertiary) !important;
+}
+
+/* Specific page headings */
+[data-theme="dark"] #page-title {
+    color: var(--text-light) !important;
+}
+
+.step-card {
+    transition: all 0.3s ease-in-out;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.step-card.hidden {
+    opacity: 0;
+    transform: translateY(10px);
+    position: absolute;
+    pointer-events: none;
+}
+
+.btn-primary {
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-rotate: 0;
+    --tw-skew-x: 0;
+    --tw-skew-y: 0;
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
+    background-color: var(--btn-primary);
+    color: #ffffff;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px -1px var(--shadow), 0 2px 4px -1px var(--shadow);
+    transition-property: background-color, transform;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.btn-primary:hover {
+    background-color: var(--btn-primary-hover);
+    --tw-scale-x: 1.05;
+    --tw-scale-y: 1.05;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.btn-primary:disabled {
+    background-color: var(--btn-primary);
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.btn-secondary {
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-rotate: 0;
+    --tw-skew-x: 0;
+    --tw-skew-y: 0;
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
+    background-color: var(--btn-secondary);
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    transition-property: background-color, transform;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.btn-secondary:hover {
+    background-color: var(--btn-secondary-hover);
+    --tw-scale-x: 1.05;
+    --tw-scale-y: 1.05;
+    transform: translate(var(--tw-translate-x), var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-scale-x)) skewY(var(--tw-scale-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--modal-bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+    transition-property: opacity;
+}
+
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.lds-dual-ring {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+}
+
+.lds-dual-ring:after {
+    content: " ";
+    display: block;
+    width: 16px;
+    height: 16px;
+    margin: 2px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    border-color: #fff transparent #fff transparent;
+    animation: lds-dual-ring 1.2s linear infinite;
+}
+
+@keyframes lds-dual-ring {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.tab-btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.tab-btn.active {
+    color: #2563eb;
+    border-bottom: 2px solid #2563eb;
+}
+
+.login-form {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.login-form.hidden {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
