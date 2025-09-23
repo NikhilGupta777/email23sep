@@ -1,15 +1,17 @@
-fastapi
-uvicorn[standard]
-SQLAlchemy
-psycopg2-binary
-python-dotenv
-passlib[bcrypt]
-python-jose[cryptography]
-sendgrid
-Authlib
-dnspython
-requests
-aiohttp
-pydantic[email]
-starlette
-webbrowser
+# requirements.txt — pinned for reproducible builds (target: Python 3.12 / Vercel)
+fastapi==0.117.1
+uvicorn[standard]==0.22.0
+SQLAlchemy==2.0.43
+psycopg2-binary==2.9.10
+python-dotenv==1.1.1
+passlib[bcrypt]==1.7.4
+python-jose[cryptography]==3.3.0
+sendgrid==6.12.5
+Authlib==1.6.4
+dnspython==2.8.0
+requests==2.32.5
+aiohttp==3.8.4
+pydantic==1.10.12
+email-validator==1.3.1
+starlette==0.28.0
+# webbrowser <-- REMOVED (stdlib) 
